@@ -24,6 +24,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [running, setRunning] = useState(false)
   const [progress, setProgress] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const validDocuments = useMemo(() => documents.filter((document): document is VerificationDocument => Boolean(document)), [documents])
   const allFields = useMemo(() => Array.from(new Set([...DEFAULT_FIELDS, ...Object.keys(masterFields), ...rules.map((rule) => rule.field)])), [masterFields, rules])
@@ -95,15 +96,16 @@ function App() {
 
   return (
     <div className="verification-app">
-      <aside className="sidebar">
+      <button className={`sidebar-overlay ${menuOpen ? 'visible' : ''}`} aria-label="Close navigation" onClick={() => setMenuOpen(false)} />
+      <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
         <div className="app-brand"><span>V</span><div><strong>VerifyDoc</strong><small>Data Verification</small></div></div>
-        <nav>
+        <nav id="app-navigation">
           {pages.map((item) => (
-            <button key={item} className={page === item ? 'active' : ''} onClick={() => setPage(item)}>
+            <button key={item} className={page === item ? 'active' : ''} onClick={() => { setPage(item); setMenuOpen(false) }}>
               <i>{item[0]}</i>{item}
             </button>
           ))}
-          <button className={page === 'Document Comparison' ? 'active' : ''} onClick={() => setPage('Document Comparison')}>
+          <button className={page === 'Document Comparison' ? 'active' : ''} onClick={() => { setPage('Document Comparison'); setMenuOpen(false) }}>
             <i>C</i>Document Comparison
           </button>
         </nav>
@@ -111,6 +113,9 @@ function App() {
 
       <div className="app-main">
         <header className="topbar">
+          <button className="menu-toggle" type="button" aria-expanded={menuOpen} aria-controls="app-navigation" aria-label="Toggle navigation" onClick={() => setMenuOpen((open) => !open)}>
+            <span /><span /><span />
+          </button>
           <div><span>Enterprise Workspace</span><strong>{page}</strong></div>
           <button className="run-button" disabled={running} onClick={runVerificationJob}>
             {running ? `Verifying ${progress}%` : 'RUN VERIFICATION'}
